@@ -1,3 +1,3 @@
 # personal-task-manager
-My portfolio showcasing the skills in React and CSS.
+My project showcasing the skills in React and CSS.
 
