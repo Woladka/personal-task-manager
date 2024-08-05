@@ -1,172 +1,176 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import './App.css';
-import Auth from './Auth';
+import React, { useState } from 'react';
+import './App.css'; // Ensure styles are applied
 
-function App() {
+const App = () => {
+  // State hooks
+  const [darkMode, setDarkMode] = useState(false);
+  const [authMode, setAuthMode] = useState(true);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
-  const [dueDate, setDueDate] = useState(null);
-  const [editingTask, setEditingTask] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [dueDate, setDueDate] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    if (localStorage.getItem('username')) {
-      setIsAuthenticated(true);
-      axios.get('/tasks')
-        .then(response => setTasks(response.data))
-        .catch(error => console.error('Error fetching tasks:', error));
-    }
-  }, []);
+  // Handlers
+  const handleDarkModeToggle = () => {
+    setDarkMode(!darkMode);
+  };
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
+    if (username && password) {
+      setAuthMode(false);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('username');
-    setIsAuthenticated(false);
+    setAuthMode(true);
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
-  const addTask = () => {
-    if (newTask.trim() && dueDate) {
-      axios.post('/tasks', { task: newTask, dueDate: dueDate.toISOString() })
-        .then(response => {
-          setTasks([...tasks, response.data]);
-          setNewTask('');
-          setDueDate(null);
-        })
-        .catch(error => console.error('Error adding task:', error));
+  const handleAddTask = () => {
+    if (newTask) {
+      setTasks([
+        ...tasks,
+        {
+          id: Date.now(),
+          task: newTask,
+          dueDate: dueDate ? new Date(dueDate).toLocaleDateString('en-GB') : 'No due date',
+        },
+      ]);
+      setNewTask('');
+      setDueDate('');
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      addTask();
-    }
+  const handleEditTask = (id, updatedTask) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, task: updatedTask } : task
+    ));
   };
 
-  const toggleTask = (id, completed) => {
-    axios.put(`/tasks/${id}`, { completed: !completed })
-      .then(response => {
-        setTasks(tasks.map(task => (task.id === id ? response.data : task)));
-      })
-      .catch(error => console.error('Error toggling task:', error));
+  const handleDeleteTask = id => {
+    setTasks(tasks.filter(task => task.id !== id));
   };
 
-  const deleteTask = (id) => {
-    axios.delete(`/tasks/${id}`)
-      .then(() => {
-        setTasks(tasks.filter(task => task.id !== id));
-      })
-      .catch(error => console.error('Error deleting task:', error));
-  };
-
-  const handleEditChange = (e) => {
-    setEditingTask({ ...editingTask, task: e.target.value });
-  };
-
-  const saveEdit = () => {
-    if (editingTask) {
-      axios.put(`/tasks/${editingTask.id}`, { task: editingTask.task, completed: editingTask.completed, dueDate: editingTask.dueDate })
-        .then(response => {
-          setTasks(tasks.map(task => (task.id === editingTask.id ? response.data : task)));
-          setEditingTask(null);
-        })
-        .catch(error => console.error('Error saving task:', error));
-    }
+  const handleSearch = event => {
+    setSearchTerm(event.target.value);
   };
 
   const filteredTasks = tasks.filter(task =>
-    task.task.toLowerCase().includes(searchQuery.toLowerCase())
+    task.task.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return (
-    <div className={`App ${isDarkMode ? 'dark-mode' : ''}`}>
-      {!isAuthenticated ? (
-        <Auth onLogin={handleLogin} />
-      ) : (
-        <>
-          <div className="header">
-            <h1>Personal Task Manager</h1>
-            <button onClick={toggleDarkMode} className="dark-mode-toggle">
-              {isDarkMode ? '🌙' : '☀️'}
-            </button>
-            <button onClick={handleLogout} className="logout-button">Logout</button>
-          </div>
-
-          <div className="task-manager">
-            <div className="input-container">
-              <input
-                type="text"
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Add a new task"
-              />
-              <DatePicker
-                selected={dueDate}
-                onChange={(date) => setDueDate(date)}
-                dateFormat="yyyy/MM/dd"
-                placeholderText="Select a due date"
-              />
-              <button onClick={addTask} className="add-task">Add Task</button>
-            </div>
-
+  // Render functions
+  if (authMode) {
+    return (
+      <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
+        <div className="auth">
+          <h1>Login</h1>
+          <div className="auth-input-container">
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search tasks"
-              className="search-input"
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              className="auth-input"
             />
-
-            <div className="task-count">
-              <strong>Total Tasks:</strong> {tasks.length}
-            </div>
-
-            <ul>
-              {filteredTasks.map(task => (
-                <li key={task.id}>
-                  <span
-                    className={`task ${task.completed ? 'completed' : ''}`}
-                    onClick={() => toggleTask(task.id, task.completed)}
-                  >
-                    {task.task} {task.dueDate && <span className="due-date">({new Date(task.dueDate).toLocaleDateString()})</span>}
-                  </span>
-                  <div className="task-buttons">
-                    <button onClick={() => setEditingTask(task)} className="edit-task">Edit</button>
-                    <button onClick={() => deleteTask(task.id)} className="delete-task">Delete</button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            {editingTask && (
-              <div className="edit-task">
-                <h2>Edit Task</h2>
-                <input
-                  type="text"
-                  value={editingTask.task}
-                  onChange={handleEditChange}
-                />
-                <button onClick={saveEdit}>Save</button>
-                <button onClick={() => setEditingTask(null)}>Cancel</button>
-              </div>
-            )}
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="auth-input"
+            />
+            <button className="login-button" onClick={handleLogin}>
+              Login
+            </button>
           </div>
-        </>
-      )}
+        </div>
+        <footer className="footer">
+          Made by: Paras Khurana
+        </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`App ${darkMode ? 'dark-mode' : ''}`}>
+      <header className="header">
+        <h1>Task Manager</h1>
+        <div className="header-controls">
+          <button className="dark-mode-toggle" onClick={handleDarkModeToggle}>
+            {darkMode ? '🌙' : '🌞'}
+          </button>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      </header>
+      <div className="input-container">
+        <input
+          type="text"
+          placeholder="New task"
+          value={newTask}
+          onChange={e => setNewTask(e.target.value)}
+        />
+        <input
+          type="date"
+          value={dueDate}
+          onChange={e => setDueDate(e.target.value)}
+        />
+        <button className="add-task" onClick={handleAddTask}>
+          Add Task
+        </button>
+      </div>
+      <input
+        type="text"
+        className="search-input"
+        placeholder="Search tasks"
+        value={searchTerm}
+        onChange={handleSearch}
+      />
+      <div className="task-count">Total tasks: {filteredTasks.length}</div>
+      <table className="task-table">
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Due Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredTasks.map(task => (
+            <tr key={task.id}>
+              <td>{task.task}</td>
+              <td>{task.dueDate}</td>
+              <td className="task-buttons">
+                <button
+                  className="edit-task"
+                  onClick={() => {
+                    const updatedTask = prompt('Edit task:', task.task);
+                    if (updatedTask) {
+                      handleEditTask(task.id, updatedTask);
+                    }
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="delete-task"
+                  onClick={() => handleDeleteTask(task.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <footer className="footer">
+        Made by: Paras Khurana
+      </footer>
     </div>
   );
-}
+};
 
 export default App;

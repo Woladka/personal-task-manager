@@ -4,6 +4,10 @@
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Dark Mode */
@@ -15,22 +19,39 @@
 /* Authentication */
 .auth {
   text-align: center;
+  flex: 1;
+}
+
+.auth-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .auth input {
   padding: 10px;
-  margin: 10px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
+  border-radius: 20px; /* Ensure elliptical shape */
+  margin: 5px 0;
+  width: 100%;
+  max-width: 300px;
 }
 
-.auth button {
+.login-button {
   padding: 10px 20px;
-  border-radius: 20px;
   border: none;
-  background-color: #007bff;
+  border-radius: 20px;
+  background-color: #4a90e2;
   color: white;
   cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.login-button:hover {
+  background-color: #357abd;
 }
 
 /* Task Manager Styles */
@@ -40,11 +61,11 @@
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
-  transition: background-color 0.3s ease; /* Smooth transition for background color change */
+  transition: background-color 0.3s ease;
 }
 
 .dark-mode .task-manager {
-  background-color: #2c2c2c; /* Light grey or appropriate color for dark mode */
+  background-color: #2c2c2c;
 }
 
 /* Header and Dark Mode Toggle */
@@ -55,14 +76,29 @@
   margin-bottom: 20px;
 }
 
-header h1 {
+.header h1 {
   margin: 0;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
 }
 
 .dark-mode-toggle {
   background: none;
   border: none;
   font-size: 24px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.logout-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
   cursor: pointer;
 }
 
@@ -74,20 +110,40 @@ header h1 {
   margin-bottom: 20px;
 }
 
-input[type="text"] {
+input[type="text"],
+textarea,
+select {
   padding: 10px;
   font-size: 16px;
   border-radius: 20px;
   border: 1px solid #ccc;
-  flex: 1;
+  background-color: #fff;
+  color: #000;
 }
 
+.dark-mode input[type="text"],
+.dark-mode textarea,
+.dark-mode select {
+  background-color: #333;
+  color: #e0e0e0;
+  border: 1px solid #555;
+}
+
+/* Button Styles */
 button {
+  margin: 0;
   padding: 10px 20px;
   font-size: 16px;
-  border-radius: 20px;
+  line-height: 1;
   border: none;
+  border-radius: 20px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-width: 100px;
+  height: 40px;
 }
 
 button.add-task {
@@ -105,49 +161,73 @@ button.delete-task {
   color: white;
 }
 
-button.logout-button {
-  background-color: #dc3545;
-  color: white;
-  position: absolute;
-  top: 20px;
-  right: 20px;
+/* Task Table Styles */
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.search-input {
-  margin-bottom: 20px;
-  width: 90%;
+.task-table th,
+.task-table td {
   padding: 10px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
-.task-count {
-  margin: 10px 0;
+.task-table th {
+  background-color: #f4f4f4;
 }
 
-.task {
-  cursor: pointer;
+.dark-mode .task-table th {
+  background-color: #333;
 }
 
-.completed {
-  text-decoration: line-through;
+.task-table td {
+  vertical-align: middle;
 }
 
 .task-buttons {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
-.edit-task {
-  margin-top: 20px;
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: auto; /* Push footer to the bottom */
+  padding: 10px 0;
+  color: #888;
 }
 
-.edit-task input {
+/* Search Input and Task Count Adjustment */
+.search-input {
+  margin-bottom: 40px; /* Increase space below search input */
+  width: 100%;
   padding: 10px;
   border-radius: 20px;
   border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
 }
 
-.edit-task button {
-  margin-right: 10px;
+.dark-mode .search-input {
+  background-color: #333;
+  color: #e0e0e0;
+  border: 1px solid #555;
+}
+
+.task-count {
+  margin: 20px 0; /* Increase margin to space it out from the search input */
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .input-container {
+    flex-direction: column;
+  }
+
+  .auth-input-container {
+    flex-direction: column;
+  }
 }

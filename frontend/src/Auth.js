@@ -1,35 +1,50 @@
 import React, { useState } from 'react';
-import './Auth.css'; // Optional
+import './App.css'; // Assuming all styles are now in App.css
 
-function Auth({ onLogin }) {
+const Auth = ({ onLogin }) => {
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
-    if (username.trim()) {
-      localStorage.setItem('username', username);
-      onLogin();
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleLogin();
+    if (username && password) {
+      // Perform login logic here
+      onLogin(); // Callback to switch to the task manager view
+    } else {
+      alert('Please enter both username and password');
     }
   };
 
   return (
     <div className="auth">
-      <h2>Login</h2>
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Enter your username"
-      />
-      <button onClick={handleLogin}>Login</button>
+      <div className="auth-input-container">
+        <input
+          type="text"
+          placeholder="Enter username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type={showPassword ? 'text' : 'password'}
+          placeholder="Enter password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          className="password-visibility-toggle"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? 'Hide' : 'Show'}
+        </button>
+        <button
+          className="login-button"
+          onClick={handleLogin}
+        >
+          Login
+        </button>
+      </div>
     </div>
   );
-}
+};
 
 export default Auth;
